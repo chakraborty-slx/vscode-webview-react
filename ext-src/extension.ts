@@ -1,5 +1,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
+import * as fs from "fs";
+import { HintModel } from "../src/model/hintTreeModel";
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -96,9 +98,25 @@ class ReactPanel {
 		const stylePathOnDisk = vscode.Uri.file(path.join(this._extensionPath, 'build', mainStyle));
 		const styleUri = stylePathOnDisk.with({ scheme: 'vscode-resource' });
 
+		//load all.hints file
+
+		const fRootPath = vscode.workspace.rootPath!;
+		const fgPath = path.join(fRootPath, "all.hints");
+		const openPath = vscode.Uri.file(fgPath);
+
+		let config = getFileContent(openPath);
+
+		// vscode.workspace.openTextDocument(openPath).then((document) => {
+		// 	config = getDocumentAsJson(document);
+		// 	console.log("All hints path:-------------", config)
+		// });
+
+		const configJson = JSON.stringify(config);
+
+		// console.log("All hints :-------------", configJson)
+
 		// Use a nonce to whitelist which scripts can be run
 		const nonce = getNonce();
-
 		return `<!DOCTYPE html>
 			<html lang="en">
 			<head>
@@ -109,6 +127,11 @@ class ReactPanel {
 				<link rel="stylesheet" type="text/css" href="${styleUri}">
 				<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src vscode-resource: https:; script-src 'nonce-${nonce}';style-src vscode-resource: 'unsafe-inline' http: https: data:;">
 				<base href="${vscode.Uri.file(path.join(this._extensionPath, 'build')).with({ scheme: 'vscode-resource' })}/">
+
+				<script nonce="${nonce}">
+					window.acquireVsCodeApi = acquireVsCodeApi;
+          			window.initialData = ${configJson};
+     			</script>
 			</head>
 
 			<body>
@@ -128,4 +151,30 @@ function getNonce() {
 		text += possible.charAt(Math.floor(Math.random() * possible.length));
 	}
 	return text;
+}
+function getFileContent(fileUri: vscode.Uri): HintModel | undefined {
+	if (fs.existsSync(fileUri.fsPath)) {
+		let content = fs.readFileSync(fileUri.fsPath, "utf8");
+		let config: HintModel = JSON.parse(content);
+
+		return config;
+	}
+	return undefined;
+}
+/**
+   * Try to get a current document as json text.
+   */
+function getDocumentAsJson(document: vscode.TextDocument): any {
+	const text = document.getText();
+	if (text.trim().length === 0) {
+		return {};
+	}
+
+	try {
+		return JSON.parse(text);
+	} catch {
+		throw new Error(
+			"Could not get document as json. Content is not valid json"
+		);
+	}
 }

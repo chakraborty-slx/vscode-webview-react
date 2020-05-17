@@ -1,28 +1,22 @@
+@import "~antd/dist/antd.dark.css";
+
 .App {
   text-align: center;
 }
 
-.App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 80px;
-}
-
-.App-header {
-  background-color: #222;
-  height: 150px;
-  padding: 20px;
+.ant-table-thead > tr > th {
   color: white;
+  font-weight: bold;
+  font-size: normal;
+  text-align: left;
+  background: #1d1d1d;
+  border-bottom: 1px solid #303030;
+  -webkit-transition: background 0.3s ease;
+  transition: background 0.3s ease;
 }
 
-.App-title {
-  font-size: 1.5em;
-}
-
-.App-intro {
-  font-size: large;
-}
-
-@keyframes App-logo-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+.ant-table table {
+  font-size: small;
+  text-align: left;
+  color: #008997;
 }
